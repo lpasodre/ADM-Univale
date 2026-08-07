@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jornada ADM - O Caminho até o Diploma</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1e272e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        h2 {
+            color: #ecf0f1;
+            margin: 10px 0 5px 0;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        #game-container {
+            position: relative;
+            width: 95vw;
+            max-width: 800px;
+            height: 280px;
+            background-color: #ffffff;
+            border-bottom: 5px solid #2c3e50;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #instructions {
+            margin-top: 12px;
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        #name-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 39, 46, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        #name-modal h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        #name-input {
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            outline: none;
+            text-align: center;
+            margin-bottom: 15px;
+            width: 70%;
+            max-width: 250px;
+        }
+
+        #start-btn {
+            padding: 10px 25px;
+            font-size: 1rem;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #start-btn:active {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🎓 Jornada ADM - Rumo ao Diploma</h2>
+    <div id="game-container">
+        <div id="name-modal">
+            <h3>Qual é o nome do Futuro Administrador?</h3>
+            <input type="text" id="name-input" placeholder="Digite seu nome..." maxlength="15">
+            <button id="start-btn" onclick="startGame()">Iniciar Graduação</button>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="280"></canvas>
+    </div>
+    <div id="instructions">
+        👉 <strong>Toque na tela ou Pressione Espaço</strong> para pular as matérias da matriz! &nbsp; • &nbsp; 🟢 Modo Fácil
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // MATRIZ CURRICULAR DE ADMINISTRAÇÃO (Alimentada)
+        const matrizCurricular = [
+            // 1º Período
+            "1º Período: Cultura Empreendedora",
+            "1º Período: Gestão do Conhecimento e da Inovação",
+            "1º Período: Legislação, Ética e Cidadania",
+            "1º Período: Mediação de Conflitos",
+            "1º Período: Negociações Comerciais e Financeiras",
+            "1º Período: Produção Discursiva: Oralidade e Escrita",
+            "1º Período: Tópicos Especiais",
+            // 2º Período
+            "2º Período: Contabilidade Básica",
+            "2º Período: Direito Empresarial",
+            "2º Período: Fundamentos da Matemática",
+            "2º Período: Sistemas de Informações Gerenciais",
+            "2º Período: Teorias da Administração",
+            // 3º Período
+            "3º Período: Comportamento Humano nas Organizações",
+            "3º Período: Direito do Trabalho",
+            "3º Período: Economia",
+            "3º Período: Estratégia Empresarial",
+            "3º Período: Matemática Financeira",
+            "3º Período: Mercado de Capitais",
+            // 4º Período
+            "4º Período: Direito Tributário",
+            "4º Período: Finanças Corporativas",
+            "4º Período: Gestão por Processos",
+            "4º Período: Métodos Quantitativos Aplicados aos Negócios",
+            "4º Período: Práticas Trabalhistas e Previdenciárias",
+            // 5º Período
+            "5º Período: Análise de Cenários Econômicos",
+            "5º Período: Gestão de Marketing",
+            "5º Período: Gestão de Pessoas e Equipes",
+            "5º Período: Gestão de Projetos",
+            "5º Período: Gestão e Controle de Custos",
+            "5º Período: Tecnologias Exponenciais no Ambiente Corporativo",
+            // 6º Período
+            "6º Período: Cooperativismo e Associativismo",
+            "6º Período: Experiência do Consumidor",
+            "6º Período: Gestão de Materiais e Logística",
+            "6º Período: Gestão de Micro e Pequenas Empresas",
+            "6º Período: Gestão de Operações e Serviços",
+            "6º Período: Gestão da Qualidade",
+            "6º Período: Pesquisa Operacional",
+            // 7º Período
+            "7º Período: Consultoria",
+            "7º Período: Governança Corporativa",
+            "7º Período: Internacionalização de Empresas",
+            "7º Período: Laboratório de Negócios I",
+            "7º Período: Meio Ambiente e Negócios",
+            "7º Período: Negócios Digitais",
+            "7º Período: Optativa I",
+            // 8º Período
+            "8º Período: Business Intelligence",
+            "8º Período: Laboratório de Negócios II",
+            "8º Período: Optativa II - Administração Pública",
+            "8º Período: Perícia e Avaliação de Empresas",
+            "8º Período: Tópicos Contemporâneos de Administração"
+        ];
+
+        // Frases motivacionais aéreas (Sem colisão)
+        const frasesMotivacionais = [
+            "Foco no diploma!",
+            "Liderança e Visão Estratégica!",
+            "Você é capaz!",
+            "Rumo à Formatura!",
+            "Gestão do futuro!",
+            "Não desista!",
+            "Mantenha o ritmo!",
+            "O mercado te espera!"
+        ];
+
+        let playerName = "Estudante";
+        let isGameStarted = false;
+        let gameOver = false;
+        let gameWon = false;
+        let restartStep = 0;
+        let gameSpeed = 4.2;
+
+        let currentSubjectIndex = 0;
+        let failedSubject = "";
+
+        // Personagem
+        const player = {
+            x: 50,
+            y: 190,
+            width: 28,
+            height: 42,
+            velocityY: 0,
+            gravity: 0.55,
+            jumpForce: -14.5,
+            isJumping: false,
+            color: '#2c3e50'
+        };
+
+        let obstacles = [];
+        let flyingBanner = null;
+        let frameCount = 0;
+
+        function startGame() {
+            const input = document.getElementById('name-input').value.trim();
+            if (input !== "") {
+                playerName = input;
+            }
+            document.getElementById('name-modal').style.display = 'none';
+            isGameStarted = true;
+            gameLoop();
+        }
+
+        function spawnNextSubject() {
+            if (currentSubjectIndex < matrizCurricular.length) {
+                const subjectText = matrizCurricular[currentSubjectIndex];
+                ctx.font = "bold 12px sans-serif";
+                const textWidth = ctx.measureText(subjectText).width;
+
+                obstacles.push({
+                    x: canvas.width,
+                    y: 232,
+                    text: subjectText,
+                    width: textWidth + 14,
+                    collisionWidth: 34, // área real menor para facilitar o salto
+                    height: 22,
+                    color: '#2980b9'
+                });
+                
+                currentSubjectIndex++;
+            }
+        }
+
+        function spawnFlyingBanner() {
+            if (flyingBanner === null && Math.random() < 0.015) {
+                const randomBannerText = frasesMotivacionais[Math.floor(Math.random() * frasesMotivacionais.length)];
+                ctx.font = "bold 13px sans-serif";
+                const bannerWidth = ctx.measureText(randomBannerText).width + 16;
+                const randomY = Math.floor(Math.random() * 50) + 40; 
+
+                flyingBanner = {
+                    x: canvas.width,
+                    y: randomY,
+                    text: randomBannerText,
+                    width: bannerWidth,
+                    height: 24,
+                    speed: gameSpeed * 0.7
+                };
+            }
+        }
+
+        function update() {
+            if (!isGameStarted || gameOver || gameWon) return;
+
+            frameCount++;
+
+            // Física do Pulo
+            player.velocityY += player.gravity;
+            player.y += player.velocityY;
+
+            if (player.y >= 190) {
+                player.y = 190;
+                player.velocityY = 0;
+                player.isJumping = false;
+            }
+
+            // Gerar Disciplina da Matriz
+            if (obstacles.length === 0 && currentSubjectIndex < matrizCurricular.length) {
+                spawnNextSubject();
+            } else if (obstacles.length > 0) {
+                const lastObs = obstacles[obstacles.length - 1];
+                if (lastObs.x < canvas.width - 360 && currentSubjectIndex < matrizCurricular.length) {
+                    spawnNextSubject();
+                }
+            }
+
+            // Verificar se zerou a matriz
+            if (currentSubjectIndex >= matrizCurricular.length && obstacles.length === 0) {
+                gameWon = true;
+                return;
+            }
+
+            // Gerar e Mover Letreiros
+            spawnFlyingBanner();
+            if (flyingBanner) {
+                flyingBanner.x -= flyingBanner.speed;
+                if (flyingBanner.x + flyingBanner.width < 0) {
+                    flyingBanner = null;
+                }
+            }
+
+            // Mover e verificar colisões
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= gameSpeed;
+
+                const pBox = { x: player.x + 7, y: player.y + 4, w: player.width - 14, h: player.height - 6 };
+                // A placa continua mostrando o nome inteiro, mas só uma pequena faixa central conta como obstáculo.
+                const oBox = {
+                    x: obstacles[i].x + (obstacles[i].width - obstacles[i].collisionWidth) / 2,
+                    y: obstacles[i].y - 16,
+                    w: obstacles[i].collisionWidth,
+                    h: obstacles[i].height - 4
+                };
+
+                if (
+                    pBox.x < oBox.x + oBox.w &&
+                    pBox.x + pBox.w > oBox.x &&
+                    pBox.y < oBox.y + oBox.h &&
+                    pBox.y + pBox.h > oBox.y
+                ) {
+                    failedSubject = obstacles[i].text;
+                    gameOver = true;
+                    restartStep = 1;
+                }
+
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Chão
+            ctx.beginPath();
+            ctx.moveTo(0, 233);
+            ctx.lineTo(canvas.width, 233);
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // 1. Letreiro Voador Motivacional (Sem impacto de colisão)
+            if (flyingBanner) {
+                ctx.fillStyle = 'rgba(241, 196, 15, 0.2)';
+                ctx.fillRect(flyingBanner.x, flyingBanner.y, flyingBanner.width, flyingBanner.height);
+                
+                ctx.strokeStyle = '#f39c12';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(flyingBanner.x, flyingBanner.y, flyingBanner.width, flyingBanner.height);
+
+                ctx.fillStyle = '#d35400';
+                ctx.font = "bold 12px sans-serif";
+                ctx.fillText(flyingBanner.text, flyingBanner.x + 8, flyingBanner.y + 16);
+            }
+
+            // 2. Personagem
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.x + 14, player.y + 8, 9, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillRect(player.x + 8, player.y + 17, 12, 16);
+            ctx.fillRect(player.x + 7, player.y + 33, 5, 9);
+            ctx.fillRect(player.x + 16, player.y + 33, 5, 9);
+
+            // Etiqueta Nome
+            ctx.font = "bold 11px sans-serif";
+            const nameWidth = ctx.measureText(playerName).width + 10;
+            const badgeX = player.x + (player.width / 2) - (nameWidth / 2);
+            const badgeY = player.y - 20;
+
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(badgeX, badgeY, nameWidth, 16);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(badgeX, badgeY, nameWidth, 16);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(playerName, badgeX + 5, badgeY + 12);
+
+            // 3. Obstáculos (Matérias)
+            obstacles.forEach(obs => {
+                ctx.fillStyle = '#ebf5fb';
+                ctx.fillRect(obs.x, obs.y - 18, obs.width, obs.height);
+
+                ctx.strokeStyle = obs.color;
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(obs.x, obs.y - 18, obs.width, obs.height);
+
+                ctx.fillStyle = obs.color;
+                ctx.font = "bold 11px sans-serif";
+                ctx.fillText(obs.text, obs.x + 7, obs.y - 3);
+            });
+
+            // 4. Progresso na Matriz
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = "bold 13px sans-serif";
+            const total = matrizCurricular.length;
+            const concluida = Math.min(currentSubjectIndex - obstacles.length, total);
+            ctx.fillText(`Progresso Curricular: ${Math.max(0, concluida)} / ${total}`, 550, 30);
+
+            // 5. Tela de Retenção (Game Over)
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.88)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = "bold 18px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`RETENÇÃO EM: ${failedSubject.toUpperCase()}`, canvas.width / 2, 90);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "14px sans-serif";
+                ctx.fillText(`${playerName}, estude mais essa disciplina para avançar!`, canvas.width / 2, 125);
+                
+                if (restartStep === 1) {
+                    ctx.fillStyle = '#e67e22';
+                    ctx.font = "bold 14px sans-serif";
+                    ctx.fillText("⚠️ Toque 1 vez para destravar a rematrícula", canvas.width / 2, 175);
+                } else if (restartStep === 2) {
+                    ctx.fillStyle = '#2ecc71';
+                    ctx.font = "bold 15px sans-serif";
+                    ctx.fillText("👉 Toque MAIS 1 VEZ para reiniciar do 1º período!", canvas.width / 2, 175);
+                }
+                
+                ctx.textAlign = "start";
+            }
+
+            // 6. Tela de Formatura (Vitória)
+            if (gameWon) {
+                ctx.fillStyle = 'rgba(243, 156, 18, 0.95)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "bold 24px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`🎓 PARABÉNS, ${playerName.toUpperCase()}! 🎓`, canvas.width / 2, 75);
+
+                ctx.font = "16px sans-serif";
+                ctx.fillText("Você concluiu com êxito todas as disciplinas da matriz curricular e conquistou o título de:", canvas.width / 2, 115);
+
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = "bold 24px sans-serif";
+                ctx.fillText("BACHAREL EM ADMINISTRAÇÃO", canvas.width / 2, 165);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "14px sans-serif";
+                ctx.fillText("Clique ou toque para jogar novamente", canvas.width / 2, 225);
+
+                ctx.textAlign = "start";
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            if (!gameOver && !gameWon && isGameStarted) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function handleAction(e) {
+            if (e && e.target.id === 'name-input' || e && e.target.id === 'start-btn') return;
+            if (e) e.preventDefault();
+            
+            if (!isGameStarted) return;
+
+            if (gameWon) {
+                currentSubjectIndex = 0;
+                obstacles = [];
+                flyingBanner = null;
+                gameOver = false;
+                gameWon = false;
+                restartStep = 0;
+                player.y = 190;
+                player.velocityY = 0;
+                gameLoop();
+            } else if (gameOver) {
+                if (restartStep === 1) {
+                    restartStep = 2;
+                    draw();
+                } else if (restartStep === 2) {
+                    currentSubjectIndex = 0;
+                    obstacles = [];
+                    flyingBanner = null;
+                    gameOver = false;
+                    restartStep = 0;
+                    player.y = 190;
+                    player.velocityY = 0;
+                    gameLoop();
+                }
+            } else if (!player.isJumping) {
+                player.velocityY = player.jumpForce;
+                player.isJumping = true;
+            }
+        }
+
+        window.addEventListener('touchstart', handleAction, { passive: false });
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                handleAction(e);
+            }
+        });
+    </script>
+</body>
+</html>
