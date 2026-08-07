@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jornada ADM Univale - O Caminho até o Diploma</title>
+    <title>Jornada ADM - O Caminho até o Diploma</title>
     <style>
         * {
             box-sizing: border-box;
@@ -108,7 +108,7 @@
 </head>
 <body>
 
-    <h2>🎓 Jornada ADM Univale - Rumo ao Diploma</h2>
+    <h2>🎓 Jornada ADM - Rumo ao Diploma</h2>
     <div id="game-container">
         <div id="name-modal">
             <h3>Qual é o nome do Futuro Administrador?</h3>
@@ -119,7 +119,7 @@
         <canvas id="gameCanvas" width="800" height="280"></canvas>
     </div>
     <div id="instructions">
-        👉 <strong>Toque na tela ou Pressione Espaço</strong> para pular as matérias da matriz!
+        👉 <strong>Toque na tela ou Pressione Espaço</strong> para pular as matérias da matriz! &nbsp; • &nbsp; 🟢 Modo Fácil
     </div>
 
     <script>
@@ -203,7 +203,7 @@
         let gameOver = false;
         let gameWon = false;
         let restartStep = 0;
-        let gameSpeed = 5.2;
+        let gameSpeed = 4.2;
 
         let currentSubjectIndex = 0;
         let failedSubject = "";
@@ -215,8 +215,8 @@
             width: 28,
             height: 42,
             velocityY: 0,
-            gravity: 0.65,
-            jumpForce: -13.5,
+            gravity: 0.55,
+            jumpForce: -14.5,
             isJumping: false,
             color: '#2c3e50'
         };
@@ -246,6 +246,7 @@
                     y: 232,
                     text: subjectText,
                     width: textWidth + 14,
+                    collisionWidth: 34, // área real menor para facilitar o salto
                     height: 22,
                     color: '#2980b9'
                 });
@@ -292,7 +293,7 @@
                 spawnNextSubject();
             } else if (obstacles.length > 0) {
                 const lastObs = obstacles[obstacles.length - 1];
-                if (lastObs.x < canvas.width - 290 && currentSubjectIndex < matrizCurricular.length) {
+                if (lastObs.x < canvas.width - 360 && currentSubjectIndex < matrizCurricular.length) {
                     spawnNextSubject();
                 }
             }
@@ -316,8 +317,14 @@
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 obstacles[i].x -= gameSpeed;
 
-                const pBox = { x: player.x + 3, y: player.y, w: player.width - 6, h: player.height };
-                const oBox = { x: obstacles[i].x, y: obstacles[i].y - 18, w: obstacles[i].width, h: obstacles[i].height };
+                const pBox = { x: player.x + 7, y: player.y + 4, w: player.width - 14, h: player.height - 6 };
+                // A placa continua mostrando o nome inteiro, mas só uma pequena faixa central conta como obstáculo.
+                const oBox = {
+                    x: obstacles[i].x + (obstacles[i].width - obstacles[i].collisionWidth) / 2,
+                    y: obstacles[i].y - 16,
+                    w: obstacles[i].collisionWidth,
+                    h: obstacles[i].height - 4
+                };
 
                 if (
                     pBox.x < oBox.x + oBox.w &&
