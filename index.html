@@ -36,7 +36,7 @@
             position: relative;
             width: 95vw;
             max-width: 800px;
-            height: 280px;
+            height: 320px;
             background-color: #ffffff;
             border-bottom: 5px solid #2c3e50;
             border-radius: 8px;
@@ -116,86 +116,93 @@
             <button id="start-btn" onclick="startGame()">Iniciar Graduação</button>
         </div>
 
-        <canvas id="gameCanvas" width="800" height="280"></canvas>
+        <canvas id="gameCanvas" width="800" height="320"></canvas>
     </div>
     <div id="instructions">
-        👉 <strong>Toque na tela ou Pressione Espaço</strong> para pular as matérias da matriz! &nbsp; • &nbsp; 🟢 Modo Fácil
+        👉 <strong>Toque na tela ou Pressione Espaço</strong> para pular as matérias da matriz!
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // MATRIZ CURRICULAR DE ADMINISTRAÇÃO (Alimentada)
+        // MATRIZ CURRICULAR DE ADMINISTRAÇÃO (Abreviada em caixas/módulos para caber na tela com quebra de linha)
         const matrizCurricular = [
             // 1º Período
-            "1º Período: Cultura Empreendedora",
-            "1º Período: Gestão do Conhecimento e da Inovação",
-            "1º Período: Legislação, Ética e Cidadania",
-            "1º Período: Mediação de Conflitos",
-            "1º Período: Negociações Comerciais e Financeiras",
-            "1º Período: Produção Discursiva: Oralidade e Escrita",
-            "1º Período: Tópicos Especiais",
+            { period: "1º Período", lines: ["Cultura", "Empreendedora"] },
+            { period: "1º Período", lines: ["Gestão da", "Inovação"] },
+            { period: "1º Período", lines: ["Legislação e", "Ética"] },
+            { period: "1º Período", lines: ["Mediação de", "Conflitos"] },
+            { period: "1º Período", lines: ["Negociações", "Comerciais"] },
+            { period: "1º Período", lines: ["Produção", "Discursiva"] },
+            { period: "1º Período", lines: ["Tópicos", "Especiais"] },
+
             // 2º Período
-            "2º Período: Contabilidade Básica",
-            "2º Período: Direito Empresarial",
-            "2º Período: Fundamentos da Matemática",
-            "2º Período: Sistemas de Informações Gerenciais",
-            "2º Período: Teorias da Administração",
+            { period: "2º Período", lines: ["Contabilidade", "Básica"] },
+            { period: "2º Período", lines: ["Direito", "Empresarial"] },
+            { period: "2º Período", lines: ["Fundamentos", "Matemática"] },
+            { period: "2º Período", lines: ["Sistemas", "Informação"] },
+            { period: "2º Período", lines: ["Teorias da", "ADM"] },
+
             // 3º Período
-            "3º Período: Comportamento Humano nas Organizações",
-            "3º Período: Direito do Trabalho",
-            "3º Período: Economia",
-            "3º Período: Estratégia Empresarial",
-            "3º Período: Matemática Financeira",
-            "3º Período: Mercado de Capitais",
+            { period: "3º Período", lines: ["Comportamento", "Organizacional"] },
+            { period: "3º Período", lines: ["Direito do", "Trabalho"] },
+            { period: "3º Período", lines: ["Economia", "Aplicada"] },
+            { period: "3º Período", lines: ["Estratégia", "Empresarial"] },
+            { period: "3º Período", lines: ["Matemática", "Financeira"] },
+            { period: "3º Período", lines: ["Mercado de", "Capitais"] },
+
             // 4º Período
-            "4º Período: Direito Tributário",
-            "4º Período: Finanças Corporativas",
-            "4º Período: Gestão por Processos",
-            "4º Período: Métodos Quantitativos Aplicados aos Negócios",
-            "4º Período: Práticas Trabalhistas e Previdenciárias",
+            { period: "4º Período", lines: ["Direito", "Tributário"] },
+            { period: "4º Período", lines: ["Finanças", "Corporativas"] },
+            { period: "4º Período", lines: ["Gestão por", "Processos"] },
+            { period: "4º Período", lines: ["Métodos", "Quantitativos"] },
+            { period: "4º Período", lines: ["Práticas", "Trabalhistas"] },
+
             // 5º Período
-            "5º Período: Análise de Cenários Econômicos",
-            "5º Período: Gestão de Marketing",
-            "5º Período: Gestão de Pessoas e Equipes",
-            "5º Período: Gestão de Projetos",
-            "5º Período: Gestão e Controle de Custos",
-            "5º Período: Tecnologias Exponenciais no Ambiente Corporativo",
+            { period: "5º Período", lines: ["Análise de", "Cenários"] },
+            { period: "5º Período", lines: ["Gestão de", "Marketing"] },
+            { period: "5º Período", lines: ["Gestão de", "Pessoas"] },
+            { period: "5º Período", lines: ["Gestão de", "Projetos"] },
+            { period: "5º Período", lines: ["Controle de", "Custos"] },
+            { period: "5º Período", lines: ["Tecnologias", "Exponenciais"] },
+
             // 6º Período
-            "6º Período: Cooperativismo e Associativismo",
-            "6º Período: Experiência do Consumidor",
-            "6º Período: Gestão de Materiais e Logística",
-            "6º Período: Gestão de Micro e Pequenas Empresas",
-            "6º Período: Gestão de Operações e Serviços",
-            "6º Período: Gestão da Qualidade",
-            "6º Período: Pesquisa Operacional",
+            { period: "6º Período", lines: ["Cooperativismo", "Associativismo"] },
+            { period: "6º Período", lines: ["Experiência do", "Consumidor"] },
+            { period: "6º Período", lines: ["Materiais e", "Logística"] },
+            { period: "6º Período", lines: ["Micro e Peq.", "Empresas"] },
+            { period: "6º Período", lines: ["Operações e", "Serviços"] },
+            { period: "6º Período", lines: ["Gestão da", "Qualidade"] },
+            { period: "6º Período", lines: ["Pesquisa", "Operacional"] },
+
             // 7º Período
-            "7º Período: Consultoria",
-            "7º Período: Governança Corporativa",
-            "7º Período: Internacionalização de Empresas",
-            "7º Período: Laboratório de Negócios I",
-            "7º Período: Meio Ambiente e Negócios",
-            "7º Período: Negócios Digitais",
-            "7º Período: Optativa I",
+            { period: "7º Período", lines: ["Consultoria", "Empresarial"] },
+            { period: "7º Período", lines: ["Governança", "Corporativa"] },
+            { period: "7º Período", lines: ["Internacionalização", "de Empresas"] },
+            { period: "7º Período", lines: ["Laboratório", "Negócios I"] },
+            { period: "7º Período", lines: ["Meio Ambiente", "& Negócios"] },
+            { period: "7º Período", lines: ["Negócios", "Digitais"] },
+            { period: "7º Período", lines: ["Optativa I", "Estratégica"] },
+
             // 8º Período
-            "8º Período: Business Intelligence",
-            "8º Período: Laboratório de Negócios II",
-            "8º Período: Optativa II - Administração Pública",
-            "8º Período: Perícia e Avaliação de Empresas",
-            "8º Período: Tópicos Contemporâneos de Administração"
+            { period: "8º Período", lines: ["Business", "Intelligence"] },
+            { period: "8º Período", lines: ["Laboratório", "Negócios II"] },
+            { period: "8º Período", lines: ["Administração", "Pública"] },
+            { period: "8º Período", lines: ["Perícia &", "Avaliação"] },
+            { period: "8º Período", lines: ["Tópicos", "Contemporâneos"] }
         ];
 
-        // Frases motivacionais aéreas (Sem colisão)
+        // Frases motivacionais aéreas (sem colisão)
         const frasesMotivacionais = [
             "Foco no diploma!",
-            "Liderança e Visão Estratégica!",
+            "Visão Estratégica!",
             "Você é capaz!",
             "Rumo à Formatura!",
             "Gestão do futuro!",
-            "Não desista!",
-            "Mantenha o ritmo!",
-            "O mercado te espera!"
+            "Superação!",
+            "Mantenha o foco!",
+            "Liderança!"
         ];
 
         let playerName = "Estudante";
@@ -203,20 +210,22 @@
         let gameOver = false;
         let gameWon = false;
         let restartStep = 0;
-        let gameSpeed = 4.2;
+        let gameSpeed = 4.2; // Velocidade moderada para pulos confortáveis
 
         let currentSubjectIndex = 0;
         let failedSubject = "";
 
-        // Personagem
+        const GROUND_Y = 250;
+
+        // Personagem com capacidade de pulo bastante melhorada
         const player = {
-            x: 50,
-            y: 190,
-            width: 28,
+            x: 60,
+            y: GROUND_Y - 42,
+            width: 26,
             height: 42,
             velocityY: 0,
-            gravity: 0.55,
-            jumpForce: -14.5,
+            gravity: 0.55,       // Gravidade suave
+            jumpForce: -13.8,    // Pulo alto e amplo
             isJumping: false,
             color: '#2c3e50'
         };
@@ -237,17 +246,19 @@
 
         function spawnNextSubject() {
             if (currentSubjectIndex < matrizCurricular.length) {
-                const subjectText = matrizCurricular[currentSubjectIndex];
-                ctx.font = "bold 12px sans-serif";
-                const textWidth = ctx.measureText(subjectText).width;
+                const item = matrizCurricular[currentSubjectIndex];
+                
+                // Módulos compactos e mais quadrados
+                const boxWidth = 95;
+                const boxHeight = 44;
 
                 obstacles.push({
                     x: canvas.width,
-                    y: 232,
-                    text: subjectText,
-                    width: textWidth + 14,
-                    collisionWidth: 34, // área real menor para facilitar o salto
-                    height: 22,
+                    y: GROUND_Y - boxHeight,
+                    width: boxWidth,
+                    height: boxHeight,
+                    period: item.period,
+                    lines: item.lines,
                     color: '#2980b9'
                 });
                 
@@ -256,11 +267,11 @@
         }
 
         function spawnFlyingBanner() {
-            if (flyingBanner === null && Math.random() < 0.015) {
+            if (flyingBanner === null && Math.random() < 0.012) {
                 const randomBannerText = frasesMotivacionais[Math.floor(Math.random() * frasesMotivacionais.length)];
                 ctx.font = "bold 13px sans-serif";
                 const bannerWidth = ctx.measureText(randomBannerText).width + 16;
-                const randomY = Math.floor(Math.random() * 50) + 40; 
+                const randomY = Math.floor(Math.random() * 60) + 30; 
 
                 flyingBanner = {
                     x: canvas.width,
@@ -268,7 +279,7 @@
                     text: randomBannerText,
                     width: bannerWidth,
                     height: 24,
-                    speed: gameSpeed * 0.7
+                    speed: gameSpeed * 0.65
                 };
             }
         }
@@ -282,29 +293,29 @@
             player.velocityY += player.gravity;
             player.y += player.velocityY;
 
-            if (player.y >= 190) {
-                player.y = 190;
+            if (player.y >= GROUND_Y - player.height) {
+                player.y = GROUND_Y - player.height;
                 player.velocityY = 0;
                 player.isJumping = false;
             }
 
-            // Gerar Disciplina da Matriz
+            // Espaçamento generoso entre caixas (400px) para dar tempo total de reação
             if (obstacles.length === 0 && currentSubjectIndex < matrizCurricular.length) {
                 spawnNextSubject();
             } else if (obstacles.length > 0) {
                 const lastObs = obstacles[obstacles.length - 1];
-                if (lastObs.x < canvas.width - 360 && currentSubjectIndex < matrizCurricular.length) {
+                if (lastObs.x < canvas.width - 400 && currentSubjectIndex < matrizCurricular.length) {
                     spawnNextSubject();
                 }
             }
 
-            // Verificar se zerou a matriz
+            // Verificar se completou a matriz
             if (currentSubjectIndex >= matrizCurricular.length && obstacles.length === 0) {
                 gameWon = true;
                 return;
             }
 
-            // Gerar e Mover Letreiros
+            // Gerar e Mover Letreiros Aéreos (Motivacionais)
             spawnFlyingBanner();
             if (flyingBanner) {
                 flyingBanner.x -= flyingBanner.speed;
@@ -313,17 +324,22 @@
                 }
             }
 
-            // Mover e verificar colisões
+            // Mover e verificar colisões (Hitbox com tolerância para evitar colisões injustas)
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 obstacles[i].x -= gameSpeed;
 
-                const pBox = { x: player.x + 7, y: player.y + 4, w: player.width - 14, h: player.height - 6 };
-                // A placa continua mostrando o nome inteiro, mas só uma pequena faixa central conta como obstáculo.
-                const oBox = {
-                    x: obstacles[i].x + (obstacles[i].width - obstacles[i].collisionWidth) / 2,
-                    y: obstacles[i].y - 16,
-                    w: obstacles[i].collisionWidth,
-                    h: obstacles[i].height - 4
+                // Hitbox um pouco menor que o desenho visual
+                const pBox = { 
+                    x: player.x + 5, 
+                    y: player.y + 4, 
+                    w: player.width - 10, 
+                    h: player.height - 4 
+                };
+                const oBox = { 
+                    x: obstacles[i].x + 4, 
+                    y: obstacles[i].y + 4, 
+                    w: obstacles[i].width - 8, 
+                    h: obstacles[i].height - 4 
                 };
 
                 if (
@@ -332,7 +348,7 @@
                     pBox.y < oBox.y + oBox.h &&
                     pBox.y + pBox.h > oBox.y
                 ) {
-                    failedSubject = obstacles[i].text;
+                    failedSubject = `${obstacles[i].period}: ${obstacles[i].lines.join(' ')}`;
                     gameOver = true;
                     restartStep = 1;
                 }
@@ -348,13 +364,17 @@
 
             // Chão
             ctx.beginPath();
-            ctx.moveTo(0, 233);
-            ctx.lineTo(canvas.width, 233);
+            ctx.moveTo(0, GROUND_Y);
+            ctx.lineTo(canvas.width, GROUND_Y);
             ctx.strokeStyle = '#2c3e50';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 4;
             ctx.stroke();
 
-            // 1. Letreiro Voador Motivacional (Sem impacto de colisão)
+            // Gramado decorativo sob o chão
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(0, GROUND_Y + 4, canvas.width, canvas.height - GROUND_Y);
+
+            // 1. Letreiro Voador Motivacional (Sem colisão)
             if (flyingBanner) {
                 ctx.fillStyle = 'rgba(241, 196, 15, 0.2)';
                 ctx.fillRect(flyingBanner.x, flyingBanner.y, flyingBanner.width, flyingBanner.height);
@@ -371,11 +391,11 @@
             // 2. Personagem
             ctx.fillStyle = player.color;
             ctx.beginPath();
-            ctx.arc(player.x + 14, player.y + 8, 9, 0, Math.PI * 2);
+            ctx.arc(player.x + 13, player.y + 8, 9, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillRect(player.x + 8, player.y + 17, 12, 16);
-            ctx.fillRect(player.x + 7, player.y + 33, 5, 9);
-            ctx.fillRect(player.x + 16, player.y + 33, 5, 9);
+            ctx.fillRect(player.x + 7, player.y + 17, 12, 16);
+            ctx.fillRect(player.x + 6, player.y + 33, 5, 9);
+            ctx.fillRect(player.x + 15, player.y + 33, 5, 9);
 
             // Etiqueta Nome
             ctx.font = "bold 11px sans-serif";
@@ -392,18 +412,39 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillText(playerName, badgeX + 5, badgeY + 12);
 
-            // 3. Obstáculos (Matérias)
+            // 3. Obstáculos (Caixas Quadradas Módulos com Quebra de Linha)
             obstacles.forEach(obs => {
+                // Sombra da caixa
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(obs.x + 3, obs.y + 3, obs.width, obs.height);
+
+                // Corpo da Caixa
                 ctx.fillStyle = '#ebf5fb';
-                ctx.fillRect(obs.x, obs.y - 18, obs.width, obs.height);
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 
                 ctx.strokeStyle = obs.color;
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(obs.x, obs.y - 18, obs.width, obs.height);
+                ctx.lineWidth = 2;
+                ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
 
-                ctx.fillStyle = obs.color;
-                ctx.font = "bold 11px sans-serif";
-                ctx.fillText(obs.text, obs.x + 7, obs.y - 3);
+                // Cabeçalho Período
+                ctx.fillStyle = '#2980b9';
+                ctx.fillRect(obs.x, obs.y, obs.width, 14);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "bold 9px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(obs.period, obs.x + (obs.width / 2), obs.y + 10);
+
+                // Linhas do Nome da Disciplina
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = "bold 10px sans-serif";
+                if (obs.lines.length === 1) {
+                    ctx.fillText(obs.lines[0], obs.x + (obs.width / 2), obs.y + 30);
+                } else if (obs.lines.length >= 2) {
+                    ctx.fillText(obs.lines[0], obs.x + (obs.width / 2), obs.y + 26);
+                    ctx.fillText(obs.lines[1], obs.x + (obs.width / 2), obs.y + 38);
+                }
+
+                ctx.textAlign = "start";
             });
 
             // 4. Progresso na Matriz
@@ -411,7 +452,7 @@
             ctx.font = "bold 13px sans-serif";
             const total = matrizCurricular.length;
             const concluida = Math.min(currentSubjectIndex - obstacles.length, total);
-            ctx.fillText(`Progresso Curricular: ${Math.max(0, concluida)} / ${total}`, 550, 30);
+            ctx.fillText(`Disciplinas Concluídas: ${Math.max(0, concluida)} / ${total}`, 550, 30);
 
             // 5. Tela de Retenção (Game Over)
             if (gameOver) {
@@ -421,20 +462,20 @@
                 ctx.fillStyle = '#e74c3c';
                 ctx.font = "bold 18px sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText(`RETENÇÃO EM: ${failedSubject.toUpperCase()}`, canvas.width / 2, 90);
+                ctx.fillText(`RETENÇÃO EM: ${failedSubject.toUpperCase()}`, canvas.width / 2, 100);
                 
                 ctx.fillStyle = '#ffffff';
                 ctx.font = "14px sans-serif";
-                ctx.fillText(`${playerName}, estude mais essa disciplina para avançar!`, canvas.width / 2, 125);
+                ctx.fillText(`${playerName}, revise o conteúdo e tente novamente!`, canvas.width / 2, 140);
                 
                 if (restartStep === 1) {
                     ctx.fillStyle = '#e67e22';
                     ctx.font = "bold 14px sans-serif";
-                    ctx.fillText("⚠️ Toque 1 vez para destravar a rematrícula", canvas.width / 2, 175);
+                    ctx.fillText("⚠️ Toque 1 vez para destravar a rematrícula", canvas.width / 2, 190);
                 } else if (restartStep === 2) {
                     ctx.fillStyle = '#2ecc71';
                     ctx.font = "bold 15px sans-serif";
-                    ctx.fillText("👉 Toque MAIS 1 VEZ para reiniciar do 1º período!", canvas.width / 2, 175);
+                    ctx.fillText("👉 Toque MAIS 1 VEZ para reiniciar do 1º período!", canvas.width / 2, 190);
                 }
                 
                 ctx.textAlign = "start";
@@ -442,24 +483,25 @@
 
             // 6. Tela de Formatura (Vitória)
             if (gameWon) {
-                ctx.fillStyle = 'rgba(243, 156, 18, 0.95)';
+                ctx.fillStyle = 'rgba(44, 62, 80, 0.95)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = '#f1c40f';
                 ctx.font = "bold 24px sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText(`🎓 PARABÉNS, ${playerName.toUpperCase()}! 🎓`, canvas.width / 2, 75);
-
-                ctx.font = "16px sans-serif";
-                ctx.fillText("Você concluiu com êxito todas as disciplinas da matriz curricular e conquistou o título de:", canvas.width / 2, 115);
-
-                ctx.fillStyle = '#2c3e50';
-                ctx.font = "bold 24px sans-serif";
-                ctx.fillText("BACHAREL EM ADMINISTRAÇÃO", canvas.width / 2, 165);
+                ctx.fillText(`🎓 PARABÉNS, ${playerName.toUpperCase()}! 🎓`, canvas.width / 2, 85);
 
                 ctx.fillStyle = '#ffffff';
+                ctx.font = "16px sans-serif";
+                ctx.fillText("Você cumpriu todas as exigências da Matriz Curricular e é oficialmente:", canvas.width / 2, 130);
+
+                ctx.fillStyle = '#2ecc71';
+                ctx.font = "bold 24px sans-serif";
+                ctx.fillText("BACHAREL EM ADMINISTRAÇÃO", canvas.width / 2, 180);
+
+                ctx.fillStyle = '#ecf0f1';
                 ctx.font = "14px sans-serif";
-                ctx.fillText("Clique ou toque para jogar novamente", canvas.width / 2, 225);
+                ctx.fillText("Toque na tela para jogar novamente", canvas.width / 2, 245);
 
                 ctx.textAlign = "start";
             }
@@ -486,7 +528,7 @@
                 gameOver = false;
                 gameWon = false;
                 restartStep = 0;
-                player.y = 190;
+                player.y = GROUND_Y - player.height;
                 player.velocityY = 0;
                 gameLoop();
             } else if (gameOver) {
@@ -499,7 +541,7 @@
                     flyingBanner = null;
                     gameOver = false;
                     restartStep = 0;
-                    player.y = 190;
+                    player.y = GROUND_Y - player.height;
                     player.velocityY = 0;
                     gameLoop();
                 }
