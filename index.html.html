@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jornada ADM - O Caminho até o Diploma</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1e272e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        h2 {
+            color: #ecf0f1;
+            margin: 10px 0 5px 0;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        #game-container {
+            position: relative;
+            width: 95vw;
+            max-width: 800px;
+            height: 280px;
+            background-color: #ffffff;
+            border-bottom: 5px solid #2c3e50;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #instructions {
+            margin-top: 12px;
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        #name-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 39, 46, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        #name-modal h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        #name-input {
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            outline: none;
+            text-align: center;
+            margin-bottom: 15px;
+            width: 70%;
+            max-width: 250px;
+        }
+
+        #start-btn {
+            padding: 10px 25px;
+            font-size: 1rem;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #start-btn:active {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🎓 Jornada ADM - Rumo ao Diploma</h2>
+    <div id="game-container">
+        <div id="name-modal">
+            <h3>Qual é o nome do Futuro Administrador?</h3>
+            <input type="text" id="name-input" placeholder="Digite seu nome..." maxlength="15">
+            <button id="start-btn" onclick="startGame()">Iniciar Graduação</button>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="280"></canvas>
+    </div>
+    <div id="instructions">
+        👉 <strong>Toque na tela ou Pressione Espaço</strong> para pular as matérias da matriz! &nbsp; • &nbsp; 🟢 Modo Fácil
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // MATRIZ CURRICULAR DE ADMINISTRAÇÃO (Alimentada)
+        const matrizCurricular = [
+            // 1º Período
+            "1º Período: Cultura Empreendedora",
+            "1º Período: Gestão do Conhecimento e da Inovação",
+            "1º Período: Legislação, Ética e Cidadania",
+            "1º Período: Mediação de Conflitos",
+            "1º Período: Negociações Comerciais e Financeiras",
+            "1º Período: Produção Discursiva: Oralidade e Escrita",
+            "1º Período: Tópicos Especiais",
+            // 2º Período
+            "2º Período: Contabilidade Básica",
+            "2º Período: Direito Empresarial",
+            "2º Período: Fundamentos da Matemática",
+            "2º Período: Sistemas de Informações Gerenciais",
+            "2º Período: Teorias da Administração",
+            // 3º Período
+            "3º Período: Comportamento Humano nas Organizações",
+            "3º Período: Direito do Trabalho",
+            "3º Período: Economia",
+            "3º Período: Estratégia Empresarial",
+            "3º Período: Matemática Financeira",
+            "3º Período: Mercado de Capitais",
+            // 4º Período
+            "4º Período: Direito Tributário",
+            "4º Período: Finanças Corporativas",
+            "4º Período: Gestão por Processos",
+            "4º Período: Métodos Quantitativos Aplicados aos Negócios",
+            "4º Período: Práticas Trabalhistas e Previdenciárias",
+            // 5º Período
+            "5º Período: Análise de Cenários Econômicos",
+            "5º Período: Gestão de Marketing",
+            "5º Período: Gestão de Pessoas e Equipes",
+            "5º Período: Gestão de Projetos",
+            "5º Período: Gestão e Controle de Custos",
+            "5º Período: Tecnologias Exponenciais no Ambiente Corporativo",
+            // 6º Período
+            "6º Período: Cooperativismo e Associativismo",
+            "6º Período: Experiência do Consumidor",
+            "6º Período: Gestão de Materiais e Logística",
+            "6º Período: Gestão de Micro e Pequenas Empresas",
+            "6º Período: Gestão de Operações e Serviços",
+            "6º Período: Gestão da Qualidade",
+            "6º Período: Pesquisa Operacional",
+            // 7º Período
+            "7º Período: Consultoria",
+            "7º Período: Governança Corporativa",
+            "7º Período: Internacionalização de Empresas",
+            "7º Período: Laboratório de Negócios I",
+            "7º Período: Meio Ambiente e Negócios",
+            "7º Período: Negócios Digitais",
+            "7º Período: Optativa I",
+            // 8º Período
+            "8º Período: Business Intelligence",
+            "8º Período: Laboratório de Negócios II",
+            "8º Período: Optativa II - Administração Pública",
+            "8º Período: Perícia e Avaliação de Empresas",
+            "8º Período: Tópicos Contemporâneos de Administração"
+        ];
+
+        // Frases motivacionais aéreas (Sem colisão)
+        const frasesMotivacionais = [
+            "Foco no diploma!",
+            "Liderança e Visão Estratégica!",
+            "Você é capaz!",
+            "Rumo à Formatura!",
+            "Gestão do futuro!",
+            "Não desista!",
+            "Mantenha o ritmo!",
+            "O mercado te espera!"
+        ];
+
+        let playerName = "Estudante";
+        let isGameStarted = false;
+        let gameOver = false;
+        let gameWon = false;
+        let restartStep = 0;
+        let gameSpeed = 4.2;
+
+        let currentSubjectIndex = 0;
+        let failedSubject = "";
+
+        // Personagem
+        const player = {
+            x: 50,
+            y: 190,
+            width: 28,
+            height: 42,
+            velocityY: 0,
+            gravity: 0.55,
+            jumpForce: -13.8,
+            isJumping: false,
+            color: '#2c3e50'
+        };
+
+        let obstacles = [];
+        let flyingBanner = null;
+        let frameCount = 0;
+
+        // Conquistas coletáveis: aparecem uma única vez por partida e não causam colisão negativa
+        let conquistas = [];
+        let atividadesSpawned = false;
+        let extensaoSpawned = false;
+        let conquistasColetadas = 0;
+
+        function startGame() {
+            const input = document.getElementById('name-input').value.trim();
+            if (input !== "") {
+                playerName = input;
+            }
+            document.getElementById('name-modal').style.display = 'none';
+            isGameStarted = true;
+            gameLoop();
+        }
+
+        // Cores dos obstáculos por período (identidade visual + diferenciação)
+        const coresPorPeriodo = {
+            1: '#1565C0',
+            2: '#00897B',
+            3: '#7B1FA2',
+            4: '#EF6C00',
+            5: '#C62828',
+            6: '#2E7D32',
+            7: '#6D4C41',
+            8: '#455A64'
+        };
+
+        function getPeriodo(subjectText) {
+            const match = subjectText.match(/^(\d+)º Período/);
+            return match ? parseInt(match[1], 10) : 1;
+        }
+
+        // Nomes abreviados para os módulos 95x44 px
+        const nomesAbreviados = {
+            "Cultura Empreendedora": ["Cultura", "Empreendedora"],
+            "Gestão do Conhecimento e da Inovação": ["Gestão do Conhec.", "e Inovação"],
+            "Legislação, Ética e Cidadania": ["Legislação, Ética", "e Cidadania"],
+            "Mediação de Conflitos": ["Mediação de", "Conflitos"],
+            "Negociações Comerciais e Financeiras": ["Negociações", "Comerc. e Financ."],
+            "Produção Discursiva: Oralidade e Escrita": ["Prod. Discursiva", "Oral. e Escrita"],
+            "Tópicos Especiais": ["Tópicos", "Especiais"],
+            "Contabilidade Básica": ["Contabilidade", "Básica"],
+            "Direito Empresarial": ["Direito", "Empresarial"],
+            "Fundamentos da Matemática": ["Fundamentos da", "Matemática"],
+            "Sistemas de Informações Gerenciais": ["Sist. Informações", "Gerenciais"],
+            "Teorias da Administração": ["Teorias da", "Administração"],
+            "Comportamento Humano nas Organizações": ["Comport. Humano", "Organizações"],
+            "Direito do Trabalho": ["Direito do", "Trabalho"],
+            "Economia": ["Economia", ""],
+            "Estratégia Empresarial": ["Estratégia", "Empresarial"],
+            "Matemática Financeira": ["Matemática", "Financeira"],
+            "Mercado de Capitais": ["Mercado de", "Capitais"],
+            "Direito Tributário": ["Direito", "Tributário"],
+            "Finanças Corporativas": ["Finanças", "Corporativas"],
+            "Gestão por Processos": ["Gestão por", "Processos"],
+            "Métodos Quantitativos Aplicados aos Negócios": ["Métodos Quant.", "Aplic. Negócios"],
+            "Práticas Trabalhistas e Previdenciárias": ["Prát. Trabalhistas", "e Previdenc."],
+            "Análise de Cenários Econômicos": ["Análise Cenários", "Econômicos"],
+            "Gestão de Marketing": ["Gestão de", "Marketing"],
+            "Gestão de Pessoas e Equipes": ["Gestão Pessoas", "e Equipes"],
+            "Gestão de Projetos": ["Gestão de", "Projetos"],
+            "Gestão e Controle de Custos": ["Gestão e Contr.", "de Custos"],
+            "Tecnologias Exponenciais no Ambiente Corporativo": ["Tecnologias", "Exponenciais"],
+            "Cooperativismo e Associativismo": ["Cooperativismo", "Associativismo"],
+            "Experiência do Consumidor": ["Experiência do", "Consumidor"],
+            "Gestão de Materiais e Logística": ["Gestão Materiais", "e Logística"],
+            "Gestão de Micro e Pequenas Empresas": ["Gestão Micro e", "Peq. Empresas"],
+            "Gestão de Operações e Serviços": ["Gestão Operações", "e Serviços"],
+            "Gestão da Qualidade": ["Gestão da", "Qualidade"],
+            "Pesquisa Operacional": ["Pesquisa", "Operacional"],
+            "Consultoria": ["Consultoria", ""],
+            "Governança Corporativa": ["Governança", "Corporativa"],
+            "Internacionalização de Empresas": ["Internacionaliz.", "de Empresas"],
+            "Laboratório de Negócios I": ["Laboratório de", "Negócios I"],
+            "Meio Ambiente e Negócios": ["Meio Ambiente", "e Negócios"],
+            "Negócios Digitais": ["Negócios", "Digitais"],
+            "Optativa I": ["Optativa I", ""],
+            "Business Intelligence": ["Business", "Intelligence"],
+            "Laboratório de Negócios II": ["Laboratório de", "Negócios II"],
+            "Optativa II - Administração Pública": ["Optativa II", "Adm. Pública"],
+            "Perícia e Avaliação de Empresas": ["Perícia e Aval.", "de Empresas"],
+            "Tópicos Contemporâneos de Administração": ["Tópicos Contemp.", "Administração"]
+        };
+
+        function getNomeDisciplina(subjectText) {
+            return subjectText.replace(/^\d+º Período:\s*/, '');
+        }
+
+        function getLinhasAbreviadas(subjectText) {
+            const nome = getNomeDisciplina(subjectText);
+            return nomesAbreviados[nome] || [nome.slice(0, 15), nome.slice(15, 30)];
+        }
+
+        function spawnNextSubject() {
+            if (currentSubjectIndex < matrizCurricular.length) {
+                const subjectText = matrizCurricular[currentSubjectIndex];
+                const periodo = getPeriodo(subjectText);
+                const linhas = getLinhasAbreviadas(subjectText);
+
+                obstacles.push({
+                    x: canvas.width,
+                    y: 232,
+                    text: subjectText,          // nome completo para a tela de retenção
+                    linhas: linhas,             // nome abreviado exibido no módulo
+                    width: 95,
+                    height: 44,
+                    periodo: periodo,
+                    color: coresPorPeriodo[periodo] || '#1565C0'
+                });
+                
+                currentSubjectIndex++;
+            }
+        }
+
+        function spawnFlyingBanner() {
+            if (flyingBanner === null && Math.random() < 0.015) {
+                const randomBannerText = frasesMotivacionais[Math.floor(Math.random() * frasesMotivacionais.length)];
+                ctx.font = "bold 13px sans-serif";
+                const bannerWidth = ctx.measureText(randomBannerText).width + 16;
+                const randomY = Math.floor(Math.random() * 50) + 40; 
+
+                flyingBanner = {
+                    x: canvas.width,
+                    y: randomY,
+                    text: randomBannerText,
+                    width: bannerWidth,
+                    height: 24,
+                    speed: gameSpeed * 0.7
+                };
+            }
+        }
+
+
+        function spawnConquista(texto, tipo) {
+            // Altura confortável: coletável com um salto normal, sem atrapalhar os módulos no chão
+            const y = tipo === 'atividades' ? 132 : 105;
+            conquistas.push({
+                x: canvas.width + 40,
+                y: y,
+                width: texto === 'ATIVIDADES COMPLEMENTARES' ? 170 : 108,
+                height: 34,
+                text: texto,
+                tipo: tipo,
+                collected: false,
+                speed: gameSpeed * 0.95
+            });
+        }
+
+        function atualizarConquistas() {
+            // Cada conquista surge uma única vez, em faixas aleatórias do progresso da graduação.
+            // Isso evita aparecerem juntos e mantém a experiência leve.
+            if (!atividadesSpawned && currentSubjectIndex >= 8 && currentSubjectIndex <= 22) {
+                if (Math.random() < 0.012) {
+                    spawnConquista('ATIVIDADES COMPLEMENTARES', 'atividades');
+                    atividadesSpawned = true;
+                }
+            }
+
+            if (!extensaoSpawned && currentSubjectIndex >= 27 && currentSubjectIndex <= 43) {
+                if (Math.random() < 0.012) {
+                    spawnConquista('EXTENSÃO', 'extensao');
+                    extensaoSpawned = true;
+                }
+            }
+
+            // Garantia de aparecimento uma vez por partida, mesmo se o sorteio não ocorrer.
+            if (!atividadesSpawned && currentSubjectIndex > 22) {
+                spawnConquista('ATIVIDADES COMPLEMENTARES', 'atividades');
+                atividadesSpawned = true;
+            }
+
+            if (!extensaoSpawned && currentSubjectIndex > 43) {
+                spawnConquista('EXTENSÃO', 'extensao');
+                extensaoSpawned = true;
+            }
+
+            for (let i = conquistas.length - 1; i >= 0; i--) {
+                const bonus = conquistas[i];
+                bonus.x -= bonus.speed;
+
+                // Hitbox ampla e amigável para coleta, sem qualquer penalidade.
+                const pBox = {
+                    x: player.x - 2,
+                    y: player.y - 2,
+                    w: player.width + 4,
+                    h: player.height + 4
+                };
+                const bBox = {
+                    x: bonus.x,
+                    y: bonus.y,
+                    w: bonus.width,
+                    h: bonus.height
+                };
+
+                const tocou = (
+                    pBox.x < bBox.x + bBox.w &&
+                    pBox.x + pBox.w > bBox.x &&
+                    pBox.y < bBox.y + bBox.h &&
+                    pBox.y + pBox.h > bBox.y
+                );
+
+                if (tocou && !bonus.collected) {
+                    bonus.collected = true;
+                    conquistasColetadas++;
+                    conquistas.splice(i, 1);
+                    continue;
+                }
+
+                if (bonus.x + bonus.width < 0) {
+                    conquistas.splice(i, 1);
+                }
+            }
+        }
+
+        function update() {
+            if (!isGameStarted || gameOver || gameWon) return;
+
+            frameCount++;
+
+            // Física do Pulo
+            player.velocityY += player.gravity;
+            player.y += player.velocityY;
+
+            if (player.y >= 190) {
+                player.y = 190;
+                player.velocityY = 0;
+                player.isJumping = false;
+            }
+
+            // Gerar Disciplina da Matriz
+            if (obstacles.length === 0 && currentSubjectIndex < matrizCurricular.length) {
+                spawnNextSubject();
+            } else if (obstacles.length > 0) {
+                const lastObs = obstacles[obstacles.length - 1];
+                if (lastObs.x < canvas.width - 400 && currentSubjectIndex < matrizCurricular.length) {
+                    spawnNextSubject();
+                }
+            }
+
+            // Verificar se zerou a matriz
+            if (currentSubjectIndex >= matrizCurricular.length && obstacles.length === 0) {
+                gameWon = true;
+                return;
+            }
+
+            // Gerar e Mover Letreiros
+            spawnFlyingBanner();
+            if (flyingBanner) {
+                flyingBanner.x -= flyingBanner.speed;
+                if (flyingBanner.x + flyingBanner.width < 0) {
+                    flyingBanner = null;
+                }
+            }
+
+            // Atualizar conquista coletáveis
+            atualizarConquistas();
+
+            // Mover e verificar colisões
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= gameSpeed;
+
+                // Hitboxes permissivas: recuo interno para perdoar toques leves nas bordas.
+                const pInsetX = 5;
+                const pInsetY = 4;
+                const oInset = 5;
+                const pBox = {
+                    x: player.x + pInsetX,
+                    y: player.y + pInsetY,
+                    w: player.width - (pInsetX * 2),
+                    h: player.height - (pInsetY * 2)
+                };
+                const oBox = {
+                    x: obstacles[i].x + oInset,
+                    y: obstacles[i].y - obstacles[i].height + oInset,
+                    w: obstacles[i].width - (oInset * 2),
+                    h: obstacles[i].height - (oInset * 2)
+                };
+
+                if (
+                    pBox.x < oBox.x + oBox.w &&
+                    pBox.x + pBox.w > oBox.x &&
+                    pBox.y < oBox.y + oBox.h &&
+                    pBox.y + pBox.h > oBox.y
+                ) {
+                    failedSubject = obstacles[i].text;
+                    gameOver = true;
+                    restartStep = 1;
+                }
+
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Fundo institucional UNIVALE (inspirado em tela de videogame clássica)
+            ctx.save();
+            ctx.globalAlpha = 0.10;
+            ctx.fillStyle = '#003B5C';
+            ctx.font = "900 82px Arial Black, sans-serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('UNIVALE', canvas.width / 2, 125);
+            ctx.restore();
+
+            // Grama / piso em azul-marinho da identidade visual
+            ctx.fillStyle = '#003B5C';
+            ctx.fillRect(0, 233, canvas.width, canvas.height - 233);
+            ctx.beginPath();
+            ctx.moveTo(0, 233);
+            ctx.lineTo(canvas.width, 233);
+            ctx.strokeStyle = '#002B45';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Pequenos detalhes de "grama" para manter o aspecto de cenário
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+            ctx.lineWidth = 1;
+            for (let gx = 8; gx < canvas.width; gx += 22) {
+                ctx.beginPath();
+                ctx.moveTo(gx, 233);
+                ctx.lineTo(gx + 3, 226);
+                ctx.moveTo(gx + 5, 233);
+                ctx.lineTo(gx + 8, 228);
+                ctx.stroke();
+            }
+
+            // 1. Letreiro Voador Motivacional (Sem impacto de colisão)
+            if (flyingBanner) {
+                ctx.fillStyle = 'rgba(241, 196, 15, 0.2)';
+                ctx.fillRect(flyingBanner.x, flyingBanner.y, flyingBanner.width, flyingBanner.height);
+                
+                ctx.strokeStyle = '#f39c12';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(flyingBanner.x, flyingBanner.y, flyingBanner.width, flyingBanner.height);
+
+                ctx.fillStyle = '#d35400';
+                ctx.font = "bold 12px sans-serif";
+                ctx.fillText(flyingBanner.text, flyingBanner.x + 8, flyingBanner.y + 16);
+            }
+
+            // 2. Personagem
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.x + 14, player.y + 8, 9, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillRect(player.x + 8, player.y + 17, 12, 16);
+
+            // Bracinhos
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = player.color;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(player.x + 8, player.y + 21);
+            ctx.lineTo(player.x + 2, player.y + 28);
+            ctx.moveTo(player.x + 20, player.y + 21);
+            ctx.lineTo(player.x + 26, player.y + 28);
+            ctx.stroke();
+            ctx.lineCap = 'butt';
+
+            // Pernas
+            ctx.fillRect(player.x + 7, player.y + 33, 5, 9);
+            ctx.fillRect(player.x + 16, player.y + 33, 5, 9);
+
+            // Etiqueta Nome
+            ctx.font = "bold 11px sans-serif";
+            const nameWidth = ctx.measureText(playerName).width + 10;
+            const badgeX = player.x + (player.width / 2) - (nameWidth / 2);
+            const badgeY = player.y - 20;
+
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(badgeX, badgeY, nameWidth, 16);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(badgeX, badgeY, nameWidth, 16);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(playerName, badgeX + 5, badgeY + 12);
+
+
+            // Conquistas coletáveis — funcionam como conquistas coletáveis, nunca como obstáculos
+            conquistas.forEach(bonus => {
+                const pulse = 1 + Math.sin(frameCount * 0.12) * 0.04;
+                const w = bonus.width * pulse;
+                const h = bonus.height * pulse;
+                const x = bonus.x - (w - bonus.width) / 2;
+                const y = bonus.y - (h - bonus.height) / 2;
+
+                ctx.save();
+
+                // Sombra suave
+                ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                ctx.fillRect(x + 3, y + 3, w, h);
+
+                // Caixa dourada/brilhante de conquista
+                ctx.fillStyle = '#F9C74F';
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeStyle = '#E67E22';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, w, h);
+
+                // Pequeno brilho decorativo
+                ctx.fillStyle = 'rgba(255,255,255,0.55)';
+                ctx.fillRect(x + 4, y + 4, Math.max(10, w * 0.22), 4);
+
+                ctx.fillStyle = '#5D4037';
+                ctx.font = bonus.text === 'ATIVIDADES COMPLEMENTARES'
+                    ? "bold 9px sans-serif"
+                    : "bold 11px sans-serif";
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(bonus.text, x + w / 2, y + h / 2 + 1);
+
+                ctx.restore();
+            });
+
+            // Indicador discreto de conquista coletados
+            ctx.fillStyle = '#003B5C';
+            ctx.font = "bold 12px sans-serif";
+            ctx.textAlign = 'start';
+            ctx.fillText(`Conquistas: ${conquistasColetadas}/2`, 18, 30);
+
+            // 3. Obstáculos (Matérias) - módulos compactos 95x44 px
+            obstacles.forEach(obs => {
+                const top = obs.y - obs.height;
+                const headerH = 14;
+
+                // Corpo claro do módulo
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(obs.x, top, obs.width, obs.height);
+
+                // Cabeçalho com a cor do período
+                ctx.fillStyle = obs.color;
+                ctx.fillRect(obs.x, top, obs.width, headerH);
+
+                // Contorno
+                ctx.strokeStyle = obs.color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(obs.x, top, obs.width, obs.height);
+
+                // Período no cabeçalho
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "bold 8px sans-serif";
+                ctx.textAlign = 'center';
+                ctx.fillText(`${obs.periodo}º Período`, obs.x + obs.width / 2, top + 10);
+
+                // Duas linhas abreviadas com a disciplina
+                ctx.fillStyle = '#243447';
+                ctx.font = "bold 8px sans-serif";
+                ctx.fillText(obs.linhas[0] || '', obs.x + obs.width / 2, top + 26);
+                ctx.fillText(obs.linhas[1] || '', obs.x + obs.width / 2, top + 37);
+                ctx.textAlign = 'start';
+            });
+
+            // 4. Progresso na Matriz
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = "bold 13px sans-serif";
+            const total = matrizCurricular.length;
+            const concluida = Math.min(currentSubjectIndex - obstacles.length, total);
+            ctx.fillText(`Progresso Curricular: ${Math.max(0, concluida)} / ${total}`, 550, 30);
+
+            // 5. Tela de Retenção (Game Over)
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.88)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = "bold 18px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`RETENÇÃO EM: ${failedSubject.toUpperCase()}`, canvas.width / 2, 90);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "14px sans-serif";
+                ctx.fillText(`${playerName}, estude mais essa disciplina para avançar!`, canvas.width / 2, 125);
+                
+                if (restartStep === 1) {
+                    ctx.fillStyle = '#e67e22';
+                    ctx.font = "bold 14px sans-serif";
+                    ctx.fillText("⚠️ Toque 1 vez para destravar a rematrícula", canvas.width / 2, 175);
+                } else if (restartStep === 2) {
+                    ctx.fillStyle = '#2ecc71';
+                    ctx.font = "bold 15px sans-serif";
+                    ctx.fillText("👉 Toque MAIS 1 VEZ para reiniciar do 1º período!", canvas.width / 2, 175);
+                }
+                
+                ctx.textAlign = "start";
+            }
+
+            // 6. Tela de Formatura (Vitória)
+            if (gameWon) {
+                ctx.fillStyle = 'rgba(243, 156, 18, 0.95)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "bold 24px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`🎓 PARABÉNS, ${playerName.toUpperCase()}! 🎓`, canvas.width / 2, 75);
+
+                ctx.font = "16px sans-serif";
+                ctx.fillText("Você concluiu com êxito todas as disciplinas da matriz curricular e conquistou o título de:", canvas.width / 2, 115);
+
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = "bold 24px sans-serif";
+                ctx.fillText("BACHAREL EM ADMINISTRAÇÃO", canvas.width / 2, 165);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "14px sans-serif";
+                ctx.fillText("Clique ou toque para jogar novamente", canvas.width / 2, 225);
+
+                ctx.textAlign = "start";
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            if (!gameOver && !gameWon && isGameStarted) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function handleAction(e) {
+            if (e && e.target.id === 'name-input' || e && e.target.id === 'start-btn') return;
+            if (e) e.preventDefault();
+            
+            if (!isGameStarted) return;
+
+            if (gameWon) {
+                currentSubjectIndex = 0;
+                obstacles = [];
+                flyingBanner = null;
+                conquistas = [];
+                atividadesSpawned = false;
+                extensaoSpawned = false;
+                conquistasColetadas = 0;
+                gameOver = false;
+                gameWon = false;
+                restartStep = 0;
+                player.y = 190;
+                player.velocityY = 0;
+                gameLoop();
+            } else if (gameOver) {
+                if (restartStep === 1) {
+                    restartStep = 2;
+                    draw();
+                } else if (restartStep === 2) {
+                    currentSubjectIndex = 0;
+                    obstacles = [];
+                    flyingBanner = null;
+                    conquistas = [];
+                    atividadesSpawned = false;
+                    extensaoSpawned = false;
+                    conquistasColetadas = 0;
+                    gameOver = false;
+                    restartStep = 0;
+                    player.y = 190;
+                    player.velocityY = 0;
+                    gameLoop();
+                }
+            } else if (!player.isJumping) {
+                player.velocityY = player.jumpForce;
+                player.isJumping = true;
+            }
+        }
+
+        window.addEventListener('touchstart', handleAction, { passive: false });
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                handleAction(e);
+            }
+        });
+    </script>
+</body>
+</html>
