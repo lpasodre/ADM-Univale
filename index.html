@@ -181,7 +181,7 @@
             // 8º Período
             "8º Período: Business Intelligence",
             "8º Período: Laboratório de Negócios II",
-            "8º Período: Optativa II - Administração Pública",
+            "8º Período: Optativa II",
             "8º Período: Perícia e Avaliação de Empresas",
             "8º Período: Tópicos Contemporâneos de Administração"
         ];
@@ -305,7 +305,7 @@
             "Optativa I": ["Optativa I", ""],
             "Business Intelligence": ["Business", "Intelligence"],
             "Laboratório de Negócios II": ["Laboratório de", "Negócios II"],
-            "Optativa II - Administração Pública": ["Optativa II", "Adm. Pública"],
+            "Optativa II": ["Optativa II", "Adm. Pública"],
             "Perícia e Avaliação de Empresas": ["Perícia e Aval.", "de Empresas"],
             "Tópicos Contemporâneos de Administração": ["Tópicos Contemp.", "Administração"]
         };
@@ -717,26 +717,63 @@
                 ctx.textAlign = "start";
             }
 
-            // 6. Tela de Formatura (Vitória)
+            // 6. Tela de Formatura (Vitória) - identidade visual UNIVALE
             if (gameWon) {
-                ctx.fillStyle = 'rgba(243, 156, 18, 0.95)';
+                // Fundo azul-marinho
+                ctx.fillStyle = '#003B5C';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = '#ffffff';
+                // Faixa superior azul mais clara
+                ctx.fillStyle = '#0A6FA8';
+                ctx.fillRect(0, 0, canvas.width, 48);
+
+                // Marca UNIVALE ao fundo
+                ctx.save();
+                ctx.globalAlpha = 0.08;
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = "bold 76px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("UNIVALE", canvas.width / 2, 200);
+                ctx.restore();
+
+                // Título
+                ctx.fillStyle = '#FFFFFF';
                 ctx.font = "bold 24px sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText(`🎓 PARABÉNS, ${playerName.toUpperCase()}! 🎓`, canvas.width / 2, 75);
+                ctx.fillText(`🎓 PARABÉNS, ${playerName.toUpperCase()}! 🎓`, canvas.width / 2, 78);
 
-                ctx.font = "16px sans-serif";
-                ctx.fillText("Você concluiu com êxito todas as disciplinas da matriz curricular e conquistou o título de:", canvas.width / 2, 115);
+                // Texto de apoio
+                ctx.fillStyle = '#DCEAF3';
+                ctx.font = "15px sans-serif";
+                ctx.fillText(
+                    "Você concluiu com êxito todas as disciplinas da matriz curricular",
+                    canvas.width / 2,
+                    118
+                );
+                ctx.fillText(
+                    "e conquistou o título de:",
+                    canvas.width / 2,
+                    140
+                );
 
-                ctx.fillStyle = '#2c3e50';
+                // Título profissional em destaque
+                ctx.fillStyle = '#F9C74F';
                 ctx.font = "bold 24px sans-serif";
-                ctx.fillText("BACHAREL EM ADMINISTRAÇÃO", canvas.width / 2, 165);
+                ctx.fillText("BACHAREL EM ADMINISTRAÇÃO", canvas.width / 2, 176);
 
-                ctx.fillStyle = '#ffffff';
-                ctx.font = "14px sans-serif";
-                ctx.fillText("Clique ou toque para jogar novamente", canvas.width / 2, 225);
+                // Conquistas coletadas
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = "bold 13px sans-serif";
+                ctx.fillText(
+                    `Conquistas acadêmicas coletadas: ${conquistasColetadas}/2`,
+                    canvas.width / 2,
+                    204
+                );
+
+                // Instrução final
+                ctx.fillStyle = '#DCEAF3';
+                ctx.font = "13px sans-serif";
+                ctx.fillText("Clique ou toque para jogar novamente", canvas.width / 2, 238);
 
                 ctx.textAlign = "start";
             }
