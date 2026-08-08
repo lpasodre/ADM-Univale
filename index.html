@@ -1,562 +1,147 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jornada ADM - O Caminho até o Diploma</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo UNIVALE</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #1e272e;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
+    #gameContainer {
+      position: relative;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
 
-        h2 {
-            color: #ecf0f1;
-            margin: 10px 0 5px 0;
-            font-size: 1.4rem;
-            text-align: center;
-        }
-
-        #game-container {
-            position: relative;
-            width: 95vw;
-            max-width: 800px;
-            height: 320px;
-            background-color: #ffffff;
-            border-bottom: 5px solid #2c3e50;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        #instructions {
-            margin-top: 12px;
-            color: #bdc3c7;
-            font-size: 0.9rem;
-            text-align: center;
-            padding: 0 10px;
-        }
-
-        #name-modal {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(30, 39, 46, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        #name-modal h3 {
-            color: #fff;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        #name-input {
-            padding: 10px 15px;
-            font-size: 1rem;
-            border: 2px solid #3498db;
-            border-radius: 5px;
-            outline: none;
-            text-align: center;
-            margin-bottom: 15px;
-            width: 70%;
-            max-width: 250px;
-        }
-
-        #start-btn {
-            padding: 10px 25px;
-            font-size: 1rem;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        #start-btn:active {
-            background-color: #27ae60;
-        }
-    </style>
+    canvas {
+      border: 2px solid #ffffff;
+      background-color: #f4f4f9;
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
-    <h2>🎓 Jornada ADM - Rumo ao Diploma</h2>
-    <div id="game-container">
-        <div id="name-modal">
-            <h3>Qual é o nome do Futuro Administrador?</h3>
-            <input type="text" id="name-input" placeholder="Digite seu nome..." maxlength="15">
-            <button id="start-btn" onclick="startGame()">Iniciar Graduação</button>
-        </div>
+<div id="gameContainer">
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+</div>
 
-        <canvas id="gameCanvas" width="800" height="320"></canvas>
-    </div>
-    <div id="instructions">
-        👉 <strong>Toque na tela ou Pressione Espaço</strong> para pular as matérias da matriz!
-    </div>
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+  // Configurações Globais
+  const LARGURA = canvas.width;
+  const ALTURA = canvas.height;
+  const ALTURA_CHAO = 80; // Espessura da grama/chão
+  const Y_CHAO = ALTURA - ALTURA_CHAO;
 
-        // MATRIZ CURRICULAR DE ADMINISTRAÇÃO (Abreviada em caixas/módulos para caber na tela com quebra de linha)
-        const matrizCurricular = [
-            // 1º Período
-            { period: "1º Período", lines: ["Cultura", "Empreendedora"] },
-            { period: "1º Período", lines: ["Gestão da", "Inovação"] },
-            { period: "1º Período", lines: ["Legislação e", "Ética"] },
-            { period: "1º Período", lines: ["Mediação de", "Conflitos"] },
-            { period: "1º Período", lines: ["Negociações", "Comerciais"] },
-            { period: "1º Período", lines: ["Produção", "Discursiva"] },
-            { period: "1º Período", lines: ["Tópicos", "Especiais"] },
+  // Identidade Visual UNIVALE
+  const COR_GRAMA_UNIVALE = "#002A5C"; // Azul-marinho
 
-            // 2º Período
-            { period: "2º Período", lines: ["Contabilidade", "Básica"] },
-            { period: "2º Período", lines: ["Direito", "Empresarial"] },
-            { period: "2º Período", lines: ["Fundamentos", "Matemática"] },
-            { period: "2º Período", lines: ["Sistemas", "Informação"] },
-            { period: "2º Período", lines: ["Teorias da", "ADM"] },
+  // Cores que mudam a cada período (fase/tempo)
+  const CORES_PERIODOS = [
+    "#E63946", // Período 1 - Vermelho
+    "#F4A261", // Período 2 - Laranja
+    "#2A9D8F", // Período 3 - Verde
+    "#E76F51", // Período 4 - Coral
+    "#9B5DE5"  // Período 5 - Roxo
+  ];
 
-            // 3º Período
-            { period: "3º Período", lines: ["Comportamento", "Organizacional"] },
-            { period: "3º Período", lines: ["Direito do", "Trabalho"] },
-            { period: "3º Período", lines: ["Economia", "Aplicada"] },
-            { period: "3º Período", lines: ["Estratégia", "Empresarial"] },
-            { period: "3º Período", lines: ["Matemática", "Financeira"] },
-            { period: "3º Período", lines: ["Mercado de", "Capitais"] },
+  // Estado do Jogo
+  let tempoInicio = Date.now();
+  let obstaculos = [
+    { x: 500, y: Y_CHAO - 40, largura: 30, altura: 40 },
+    { x: 750, y: Y_CHAO - 50, largura: 35, altura: 50 }
+  ];
 
-            // 4º Período
-            { period: "4º Período", lines: ["Direito", "Tributário"] },
-            { period: "4º Período", lines: ["Finanças", "Corporativas"] },
-            { period: "4º Período", lines: ["Gestão por", "Processos"] },
-            { period: "4º Período", lines: ["Métodos", "Quantitativos"] },
-            { period: "4º Período", lines: ["Práticas", "Trabalhistas"] },
+  // 1. Desenhar a marca d'água "UNIVALE" grande ao fundo estilo SEGA
+  function desenharFundoUNIVALE() {
+    ctx.save();
+    
+    // Suave opacidade para não prejudicar a visão dos elementos do jogo
+    ctx.globalAlpha = 0.08; 
+    
+    ctx.font = "900 130px 'Arial Black', Impact, sans-serif";
+    ctx.fillStyle = "#002A5C";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-            // 5º Período
-            { period: "5º Período", lines: ["Análise de", "Cenários"] },
-            { period: "5º Período", lines: ["Gestão de", "Marketing"] },
-            { period: "5º Período", lines: ["Gestão de", "Pessoas"] },
-            { period: "5º Período", lines: ["Gestão de", "Projetos"] },
-            { period: "5º Período", lines: ["Controle de", "Custos"] },
-            { period: "5º Período", lines: ["Tecnologias", "Exponenciais"] },
+    // Desenha centralizado na tela
+    ctx.fillText("UNIVALE", LARGURA / 2, (ALTURA - ALTURA_CHAO) / 2);
 
-            // 6º Período
-            { period: "6º Período", lines: ["Cooperativismo", "Associativismo"] },
-            { period: "6º Período", lines: ["Experiência do", "Consumidor"] },
-            { period: "6º Período", lines: ["Materiais e", "Logística"] },
-            { period: "6º Período", lines: ["Micro e Peq.", "Empresas"] },
-            { period: "6º Período", lines: ["Operações e", "Serviços"] },
-            { period: "6º Período", lines: ["Gestão da", "Qualidade"] },
-            { period: "6º Período", lines: ["Pesquisa", "Operacional"] },
+    ctx.restore();
+  }
 
-            // 7º Período
-            { period: "7º Período", lines: ["Consultoria", "Empresarial"] },
-            { period: "7º Período", lines: ["Governança", "Corporativa"] },
-            { period: "7º Período", lines: ["Internacionalização", "de Empresas"] },
-            { period: "7º Período", lines: ["Laboratório", "Negócios I"] },
-            { period: "7º Período", lines: ["Meio Ambiente", "& Negócios"] },
-            { period: "7º Período", lines: ["Negócios", "Digitais"] },
-            { period: "7º Período", lines: ["Optativa I", "Estratégica"] },
+  // 2. Desenhar a grama/chão em azul-marinho da UNIVALE
+  function desenharGrama() {
+    ctx.fillStyle = COR_GRAMA_UNIVALE;
+    ctx.fillRect(0, Y_CHAO, LARGURA, ALTURA_CHAO);
+  }
 
-            // 8º Período
-            { period: "8º Período", lines: ["Business", "Intelligence"] },
-            { period: "8º Período", lines: ["Laboratório", "Negócios II"] },
-            { period: "8º Período", lines: ["Administração", "Pública"] },
-            { period: "8º Período", lines: ["Perícia &", "Avaliação"] },
-            { period: "8º Período", lines: ["Tópicos", "Contemporâneos"] }
-        ];
+  // Obter a cor dos obstáculos baseada no tempo decorrido (muda a cada 5s)
+  function getCorObstaculoAtual(tempoDecorrido) {
+    const periodo = Math.floor(tempoDecorrido / 5); // Troca a cada 5 segundos
+    const indiceCor = periodo % CORES_PERIODOS.length;
+    return {
+      cor: CORES_PERIODOS[indiceCor],
+      numeroPeriodo: periodo + 1
+    };
+  }
 
-        // Frases motivacionais aéreas (sem colisão)
-        const frasesMotivacionais = [
-            "Foco no diploma!",
-            "Visão Estratégica!",
-            "Você é capaz!",
-            "Rumo à Formatura!",
-            "Gestão do futuro!",
-            "Superação!",
-            "Mantenha o foco!",
-            "Liderança!"
-        ];
+  // 3. Desenhar Caixinhas Obstáculos com a cor do período
+  function desenharObstaculos(tempoSegundos) {
+    const infoPeriodo = getCorObstaculoAtual(tempoSegundos);
 
-        let playerName = "Estudante";
-        let isGameStarted = false;
-        let gameOver = false;
-        let gameWon = false;
-        let restartStep = 0;
-        let gameSpeed = 4.2; // Velocidade moderada para pulos confortáveis
+    obstaculos.forEach(obs => {
+      // Mover obstáculo para simular o jogo rodando
+      obs.x -= 3;
+      if (obs.x + obs.largura < 0) {
+        obs.x = LARGURA + Math.random() * 200;
+      }
 
-        let currentSubjectIndex = 0;
-        let failedSubject = "";
+      // Desenhar o obstáculo
+      ctx.fillStyle = infoPeriodo.cor;
+      ctx.fillRect(obs.x, obs.y, obs.largura, obs.altura);
 
-        const GROUND_Y = 250;
+      // Borda nos obstáculos para destaque
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(obs.x, obs.y, obs.largura, obs.altura);
+    });
 
-        // Personagem com capacidade de pulo bastante melhorada
-        const player = {
-            x: 60,
-            y: GROUND_Y - 42,
-            width: 26,
-            height: 42,
-            velocityY: 0,
-            gravity: 0.55,       // Gravidade suave
-            jumpForce: -13.8,    // Pulo alto e amplo
-            isJumping: false,
-            color: '#2c3e50'
-        };
+    // Indicador na tela mostrando o período atual e a cor correspondente
+    ctx.fillStyle = "#000";
+    ctx.font = "bold 16px Arial";
+    ctx.fillText(`Período Atual: ${infoPeriodo.numeroPeriodo}`, 20, 30);
+  }
 
-        let obstacles = [];
-        let flyingBanner = null;
-        let frameCount = 0;
+  // Loop principal do jogo
+  function gameLoop() {
+    const tempoDecorridoSegundos = (Date.now() - tempoInicio) / 1000;
 
-        function startGame() {
-            const input = document.getElementById('name-input').value.trim();
-            if (input !== "") {
-                playerName = input;
-            }
-            document.getElementById('name-modal').style.display = 'none';
-            isGameStarted = true;
-            gameLoop();
-        }
+    // Limpa a tela
+    ctx.clearRect(0, 0, LARGURA, ALTURA);
 
-        function spawnNextSubject() {
-            if (currentSubjectIndex < matrizCurricular.length) {
-                const item = matrizCurricular[currentSubjectIndex];
-                
-                // Módulos compactos e mais quadrados
-                const boxWidth = 95;
-                const boxHeight = 44;
+    // Renderiza os elementos na ordem correta de camadas
+    desenharFundoUNIVALE();
+    desenharGrama();
+    desenharObstaculos(tempoDecorridoSegundos);
 
-                obstacles.push({
-                    x: canvas.width,
-                    y: GROUND_Y - boxHeight,
-                    width: boxWidth,
-                    height: boxHeight,
-                    period: item.period,
-                    lines: item.lines,
-                    color: '#2980b9'
-                });
-                
-                currentSubjectIndex++;
-            }
-        }
+    requestAnimationFrame(gameLoop);
+  }
 
-        function spawnFlyingBanner() {
-            if (flyingBanner === null && Math.random() < 0.012) {
-                const randomBannerText = frasesMotivacionais[Math.floor(Math.random() * frasesMotivacionais.length)];
-                ctx.font = "bold 13px sans-serif";
-                const bannerWidth = ctx.measureText(randomBannerText).width + 16;
-                const randomY = Math.floor(Math.random() * 60) + 30; 
+  // Iniciar o jogo
+  gameLoop();
+</script>
 
-                flyingBanner = {
-                    x: canvas.width,
-                    y: randomY,
-                    text: randomBannerText,
-                    width: bannerWidth,
-                    height: 24,
-                    speed: gameSpeed * 0.65
-                };
-            }
-        }
-
-        function update() {
-            if (!isGameStarted || gameOver || gameWon) return;
-
-            frameCount++;
-
-            // Física do Pulo
-            player.velocityY += player.gravity;
-            player.y += player.velocityY;
-
-            if (player.y >= GROUND_Y - player.height) {
-                player.y = GROUND_Y - player.height;
-                player.velocityY = 0;
-                player.isJumping = false;
-            }
-
-            // Espaçamento generoso entre caixas (400px) para dar tempo total de reação
-            if (obstacles.length === 0 && currentSubjectIndex < matrizCurricular.length) {
-                spawnNextSubject();
-            } else if (obstacles.length > 0) {
-                const lastObs = obstacles[obstacles.length - 1];
-                if (lastObs.x < canvas.width - 400 && currentSubjectIndex < matrizCurricular.length) {
-                    spawnNextSubject();
-                }
-            }
-
-            // Verificar se completou a matriz
-            if (currentSubjectIndex >= matrizCurricular.length && obstacles.length === 0) {
-                gameWon = true;
-                return;
-            }
-
-            // Gerar e Mover Letreiros Aéreos (Motivacionais)
-            spawnFlyingBanner();
-            if (flyingBanner) {
-                flyingBanner.x -= flyingBanner.speed;
-                if (flyingBanner.x + flyingBanner.width < 0) {
-                    flyingBanner = null;
-                }
-            }
-
-            // Mover e verificar colisões (Hitbox com tolerância para evitar colisões injustas)
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                obstacles[i].x -= gameSpeed;
-
-                // Hitbox um pouco menor que o desenho visual
-                const pBox = { 
-                    x: player.x + 5, 
-                    y: player.y + 4, 
-                    w: player.width - 10, 
-                    h: player.height - 4 
-                };
-                const oBox = { 
-                    x: obstacles[i].x + 4, 
-                    y: obstacles[i].y + 4, 
-                    w: obstacles[i].width - 8, 
-                    h: obstacles[i].height - 4 
-                };
-
-                if (
-                    pBox.x < oBox.x + oBox.w &&
-                    pBox.x + pBox.w > oBox.x &&
-                    pBox.y < oBox.y + oBox.h &&
-                    pBox.y + pBox.h > oBox.y
-                ) {
-                    failedSubject = `${obstacles[i].period}: ${obstacles[i].lines.join(' ')}`;
-                    gameOver = true;
-                    restartStep = 1;
-                }
-
-                if (obstacles[i].x + obstacles[i].width < 0) {
-                    obstacles.splice(i, 1);
-                }
-            }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Chão
-            ctx.beginPath();
-            ctx.moveTo(0, GROUND_Y);
-            ctx.lineTo(canvas.width, GROUND_Y);
-            ctx.strokeStyle = '#2c3e50';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-            // Gramado decorativo sob o chão
-            ctx.fillStyle = '#27ae60';
-            ctx.fillRect(0, GROUND_Y + 4, canvas.width, canvas.height - GROUND_Y);
-
-            // 1. Letreiro Voador Motivacional (Sem colisão)
-            if (flyingBanner) {
-                ctx.fillStyle = 'rgba(241, 196, 15, 0.2)';
-                ctx.fillRect(flyingBanner.x, flyingBanner.y, flyingBanner.width, flyingBanner.height);
-                
-                ctx.strokeStyle = '#f39c12';
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(flyingBanner.x, flyingBanner.y, flyingBanner.width, flyingBanner.height);
-
-                ctx.fillStyle = '#d35400';
-                ctx.font = "bold 12px sans-serif";
-                ctx.fillText(flyingBanner.text, flyingBanner.x + 8, flyingBanner.y + 16);
-            }
-
-            // 2. Personagem
-            ctx.fillStyle = player.color;
-            ctx.beginPath();
-            ctx.arc(player.x + 13, player.y + 8, 9, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillRect(player.x + 7, player.y + 17, 12, 16);
-            ctx.fillRect(player.x + 6, player.y + 33, 5, 9);
-            ctx.fillRect(player.x + 15, player.y + 33, 5, 9);
-
-            // Etiqueta Nome
-            ctx.font = "bold 11px sans-serif";
-            const nameWidth = ctx.measureText(playerName).width + 10;
-            const badgeX = player.x + (player.width / 2) - (nameWidth / 2);
-            const badgeY = player.y - 20;
-
-            ctx.fillStyle = '#34495e';
-            ctx.fillRect(badgeX, badgeY, nameWidth, 16);
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(badgeX, badgeY, nameWidth, 16);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(playerName, badgeX + 5, badgeY + 12);
-
-            // 3. Obstáculos (Caixas Quadradas Módulos com Quebra de Linha)
-            obstacles.forEach(obs => {
-                // Sombra da caixa
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-                ctx.fillRect(obs.x + 3, obs.y + 3, obs.width, obs.height);
-
-                // Corpo da Caixa
-                ctx.fillStyle = '#ebf5fb';
-                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-
-                ctx.strokeStyle = obs.color;
-                ctx.lineWidth = 2;
-                ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
-
-                // Cabeçalho Período
-                ctx.fillStyle = '#2980b9';
-                ctx.fillRect(obs.x, obs.y, obs.width, 14);
-                ctx.fillStyle = '#ffffff';
-                ctx.font = "bold 9px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(obs.period, obs.x + (obs.width / 2), obs.y + 10);
-
-                // Linhas do Nome da Disciplina
-                ctx.fillStyle = '#2c3e50';
-                ctx.font = "bold 10px sans-serif";
-                if (obs.lines.length === 1) {
-                    ctx.fillText(obs.lines[0], obs.x + (obs.width / 2), obs.y + 30);
-                } else if (obs.lines.length >= 2) {
-                    ctx.fillText(obs.lines[0], obs.x + (obs.width / 2), obs.y + 26);
-                    ctx.fillText(obs.lines[1], obs.x + (obs.width / 2), obs.y + 38);
-                }
-
-                ctx.textAlign = "start";
-            });
-
-            // 4. Progresso na Matriz
-            ctx.fillStyle = '#2c3e50';
-            ctx.font = "bold 13px sans-serif";
-            const total = matrizCurricular.length;
-            const concluida = Math.min(currentSubjectIndex - obstacles.length, total);
-            ctx.fillText(`Disciplinas Concluídas: ${Math.max(0, concluida)} / ${total}`, 550, 30);
-
-            // 5. Tela de Retenção (Game Over)
-            if (gameOver) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.88)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = '#e74c3c';
-                ctx.font = "bold 18px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(`RETENÇÃO EM: ${failedSubject.toUpperCase()}`, canvas.width / 2, 100);
-                
-                ctx.fillStyle = '#ffffff';
-                ctx.font = "14px sans-serif";
-                ctx.fillText(`${playerName}, revise o conteúdo e tente novamente!`, canvas.width / 2, 140);
-                
-                if (restartStep === 1) {
-                    ctx.fillStyle = '#e67e22';
-                    ctx.font = "bold 14px sans-serif";
-                    ctx.fillText("⚠️ Toque 1 vez para destravar a rematrícula", canvas.width / 2, 190);
-                } else if (restartStep === 2) {
-                    ctx.fillStyle = '#2ecc71';
-                    ctx.font = "bold 15px sans-serif";
-                    ctx.fillText("👉 Toque MAIS 1 VEZ para reiniciar do 1º período!", canvas.width / 2, 190);
-                }
-                
-                ctx.textAlign = "start";
-            }
-
-            // 6. Tela de Formatura (Vitória)
-            if (gameWon) {
-                ctx.fillStyle = 'rgba(44, 62, 80, 0.95)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = '#f1c40f';
-                ctx.font = "bold 24px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(`🎓 PARABÉNS, ${playerName.toUpperCase()}! 🎓`, canvas.width / 2, 85);
-
-                ctx.fillStyle = '#ffffff';
-                ctx.font = "16px sans-serif";
-                ctx.fillText("Você cumpriu todas as exigências da Matriz Curricular e é oficialmente:", canvas.width / 2, 130);
-
-                ctx.fillStyle = '#2ecc71';
-                ctx.font = "bold 24px sans-serif";
-                ctx.fillText("BACHAREL EM ADMINISTRAÇÃO", canvas.width / 2, 180);
-
-                ctx.fillStyle = '#ecf0f1';
-                ctx.font = "14px sans-serif";
-                ctx.fillText("Toque na tela para jogar novamente", canvas.width / 2, 245);
-
-                ctx.textAlign = "start";
-            }
-        }
-
-        function gameLoop() {
-            update();
-            draw();
-            if (!gameOver && !gameWon && isGameStarted) {
-                requestAnimationFrame(gameLoop);
-            }
-        }
-
-        function handleAction(e) {
-            if (e && e.target.id === 'name-input' || e && e.target.id === 'start-btn') return;
-            if (e) e.preventDefault();
-            
-            if (!isGameStarted) return;
-
-            if (gameWon) {
-                currentSubjectIndex = 0;
-                obstacles = [];
-                flyingBanner = null;
-                gameOver = false;
-                gameWon = false;
-                restartStep = 0;
-                player.y = GROUND_Y - player.height;
-                player.velocityY = 0;
-                gameLoop();
-            } else if (gameOver) {
-                if (restartStep === 1) {
-                    restartStep = 2;
-                    draw();
-                } else if (restartStep === 2) {
-                    currentSubjectIndex = 0;
-                    obstacles = [];
-                    flyingBanner = null;
-                    gameOver = false;
-                    restartStep = 0;
-                    player.y = GROUND_Y - player.height;
-                    player.velocityY = 0;
-                    gameLoop();
-                }
-            } else if (!player.isJumping) {
-                player.velocityY = player.jumpForce;
-                player.isJumping = true;
-            }
-        }
-
-        window.addEventListener('touchstart', handleAction, { passive: false });
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' || e.code === 'ArrowUp') {
-                handleAction(e);
-            }
-        });
-    </script>
 </body>
 </html>
