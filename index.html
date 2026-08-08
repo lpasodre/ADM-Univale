@@ -305,7 +305,7 @@
             "Optativa I": ["Optativa I", ""],
             "Business Intelligence": ["Business", "Intelligence"],
             "Laboratório de Negócios II": ["Laboratório de", "Negócios II"],
-            "Optativa II": ["Optativa II", "Adm. Pública"],
+            "Optativa II": ["OPTATIVA II", ""],
             "Perícia e Avaliação de Empresas": ["Perícia e Aval.", "de Empresas"],
             "Tópicos Contemporâneos de Administração": ["Tópicos Contemp.", "Administração"]
         };
@@ -316,7 +316,8 @@
 
         function getLinhasAbreviadas(subjectText) {
             const nome = getNomeDisciplina(subjectText);
-            return nomesAbreviados[nome] || [nome.slice(0, 15), nome.slice(15, 30)];
+            const linhas = nomesAbreviados[nome] || [nome.slice(0, 15), nome.slice(15, 30)];
+            return linhas.map(linha => linha.toUpperCase());
         }
 
         function spawnNextSubject() {
